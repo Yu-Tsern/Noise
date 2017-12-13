@@ -1,4 +1,5 @@
 # These are the functions used in the protocol.
+import os
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.asymmetric import x25519
@@ -7,29 +8,13 @@ from cryptography.hazmat.primitives import hashes, hmac
 # DH functions
 
 def GENERATE_KEYPAIR():
-    private_key = x25519.X25519PrivateKey.generate()
-    public_key = private_key.public_key()
-    return KeyPair25519(private_key, public_key, public_key.public_bytes())
+    return x25519.X25519PrivateKey.generate()
 
-def DH(key_pair, public_key):
-    if not isinstance(private_key, x25519.X25519PrivateKey) or not isinstance(public_key, x25519.X25519PublicKey):
-        raise NoiseValueError('Invalid keys! Must be x25519.X25519PrivateKey and x25519.X25519PublicKey instances')
+def DH(private_key, public_key):
     return private_key.exchange(public_key)
 
 
-# Cipher function
-
-def ENCRYPT(k, n, ad, plaintext):
-    return AESGCM.encrypt(nonce=NONCE(n), data=plaintext, associated_data=ad)
-
-def DECRYPT(k, n, ad, ciphertext):
-    return AESGCM.decrypt(nonce=NONCE(n), data=ciphertext, associated_data=ad)
-
-def NONCE(n):
-    return b'\x00\x00\x00\x00' + n.to_bytes(length=8, byteorder='big')
-
-def REKEY(k):
-    return ENCRYPT(k, MAX_NONCE, b'', b'\x00' * 32)[:32]
+# Cipher functions use aesgcm
 
 
 # Hash functions
@@ -58,5 +43,22 @@ def HKDF(chaining_key, input_key_material, num_outputs):
 
 
 if __name__ == "__main__":
-    print("Hash: ", HASH(b'hello'))
+    key1 = GENERATE_KEYPAIR()
+    key2 = GENERATE_KEYPAIR()
+    print("DH(key1, key2_public): ", DH(key1, key2.public_key()))
+    print("DH(key1, key2_public): ", DH(key1, key2.public_key()))
+
+    nonce = os.urandom(12)
+    aad = b"authenticated but unencrypted data"
+    key = AESGCM.generate_key(bit_length=128)
+    aesgcm1 = AESGCM(key)
+    aesgcm2 = AESGCM(key)
+    pt = b"a secret message"
+    ct = aesgcm1.encrypt(nonce, pt, aad)
+    rt = aesgcm2.decrypt(nonce, ct, aad)
+    print("Plaintext: ", pt)
+    print("Ciphertext: ", ct)
+    print("Recovertext: ", rt)
+
+
     print("Mac: ", HMAC_HASH(b'key', b'hello'))
