@@ -87,7 +87,7 @@ class responder(object):
 
         # use KDF to get 2 key
         self.ck1, self.ck2 = HKDF(self.ck, temp, 2)
-
+        return self.ck1,self.ck2
 
     def encrypt(self, key, plain_text):
         return b"2"
