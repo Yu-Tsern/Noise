@@ -28,10 +28,12 @@ class responder(object):
 
         self.ck = self.h
 
-        self.re_pub = b"This is fake sender's public key"
-        self.h = HASH(self.h + self.re_pub)
+        self.re_pub = GENERATE_KEYPAIR().public_key()
+        #self.re_pub = b"This is fake sender's public key"
 
-        self.h = HASH(self.h + self.re_pub)
+        self.h = HASH(self.h + self.re_pub.public_bytes())
+
+
         self.h = HASH(self.h + self.h)
 
     # <------------ e, dhee,s,dhse
@@ -39,10 +41,9 @@ class responder(object):
     def second_stage(self):
         # "e"
 
-        self.e_pub = b"This is fake responder's public key"
 
         # dhee
-        self.h = HASH(self.h + self.e_pub)
+        self.h = HASH(self.h + self.e_pub.public_bytes())
         temp = DH(self.e_pri, self.re_pub)
         # self.ck = "new ck from dhee with KDF"
         # self.k = "new key from dhee with FDK"
@@ -52,7 +53,7 @@ class responder(object):
         # s
         self.s_pub = self.s_key.public_key()
 
-        cipher_to_sent = self.h + self.s_pub
+        cipher_to_sent = self.h + self.s_pub.public_bytes()
         cipher_to_sent = self.encrypt(self.k, cipher_to_sent)
         self.h = HASH(self.h + cipher_to_sent)
 
@@ -60,7 +61,7 @@ class responder(object):
         # For "se": Calls MixKey(DH(s, re)) if initiator, MixKey(DH(e, rs)) otherwise.
         # self.ck = b"new ck from dhse with KDF"
         # self.k = b"new key from dhse with KDF"
-        temp = DH(self.s_pub, self.re_pub)
+        temp = DH(self.s_pri, self.re_pub)
         self.ck, self.k = HKDF(self.ck, temp, 2)
         self.n = 0
 
@@ -72,7 +73,8 @@ class responder(object):
 
     def third_stage(self):
         # s
-        self.rs = b"this is the fake sender's static key from sender"
+        self.rs = GENERATE_KEYPAIR().public_key()
+        #self.rs = b"this is the fake sender's static key from sender"
 
         cipher_from_sender = b"123"
         self.h = HASH(self.h + cipher_from_sender)
@@ -81,7 +83,7 @@ class responder(object):
         # For "se": Calls MixKey(DH(s, re)) if initiator, MixKey(DH(e, rs)) otherwise.
         # self.ck = b"new ck from dhse with KDF"
         # self.k = b"new key from dhse with KDF"
-        temp = DH(self.e_pub, self.rs)
+        temp = DH(self.e_pri, self.rs)
 
         # use KDF to get 2 key
         self.ck1, self.ck2 = HKDF(self.ck, temp, 2)
