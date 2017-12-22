@@ -55,7 +55,7 @@ class responder(object):
         self.s_pub = self.s_key.public_key()
 
         cipher_to_sent = self.h + self.s_pub.public_bytes()
-        cipher_to_sent = self.encrypt(self.k, cipher_to_sent)
+       # cipher_to_sent = self.encrypt(self.k, cipher_to_sent)
         self.h = HASH(self.h + cipher_to_sent)
 
         print("responder preformed hdse and get new chaining key:ck, from KDF function")
@@ -69,7 +69,7 @@ class responder(object):
 
         # send payload encrypt with key? empty
         cipher_to_sent = self.h + b"sth"
-        cipher_to_sent = self.encrypt(self.k, cipher_to_sent)
+        ##cipher_to_sent = self.encrypt(self.k, cipher_to_sent)
 
         self.h = HASH(self.h + cipher_to_sent)
 
@@ -92,5 +92,4 @@ class responder(object):
         self.ck1, self.ck2 = HKDF(self.ck, temp, 2)
         return self.ck1, self.ck2
 
-    def encrypt(self, key, plain_text):
-        return b"2"
+

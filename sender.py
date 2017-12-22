@@ -79,7 +79,7 @@ class sender(object):
         self.s_pub = self.s_key.public_key()
         # sent it to responder
         cipher_to_sent = self.h + self.s_pub.public_bytes()
-        cipher_to_sent = self.encrypt(self.k, cipher_to_sent)
+        #cipher_to_sent = self.encrypt(self.k, cipher_to_sent)
         self.h = HASH(self.h + cipher_to_sent)
 
         # dhse
@@ -93,5 +93,3 @@ class sender(object):
         return self.ck1, self.ck2
         self.n = 0
 
-    def encrypt(self, key, plain_text):
-        return b"123"

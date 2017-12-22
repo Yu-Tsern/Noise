@@ -1,6 +1,9 @@
 from responder import *
 from sender import *
 
+# reference:  https://www.youtube.com/watch?v=ceGTgqypwnQ
+# reference: http://noiseprotocol.org/noise.html
+
 if __name__ == '__main__':
     s = sender()
     r = responder()
